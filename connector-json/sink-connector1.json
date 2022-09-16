@@ -1,0 +1,24 @@
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://kafka-consumer-svc:8083/connectors/ -d '{
+    "name": "sink-connector",
+    "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "tasks.max": "1",
+        "dialect.name": "OracleDatabaseDialect",
+        "key.converter.schema.registry.url": "http://schema-registry-svc:8081",
+        "value.converter.schema.registry.url": "http://schema-registry-svc:8081",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "topics": "dbserver2.SCHEMA1.TBL1",
+        "connection.url": "jdbc:oracle:thin:@192.168.1.x:1521:SIDNAME",
+        "connection.user": "DEMOUSER",
+        "connection.password": "*********",
+        "key.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "insert.mode": "upsert",
+        "pk.fields": "ACC_ID",
+        "pk.mode": "record_key",
+        "delete.enabled": "true",
+        "auto.create": "false"
+    }
+}'
