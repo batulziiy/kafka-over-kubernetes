@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-consumer-svc
+  namespace: datastreaming
+  labels:
+    app: kafka-consumer-svc
+spec:
+  clusterIP: None
+  ports:
+    - name: kafka-consumer-port
+      protocol: TCP
+      port: 8083
+  selector:
+    app: kafka-consumer
