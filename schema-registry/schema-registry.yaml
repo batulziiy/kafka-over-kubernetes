@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: schema-registry
+  namespace: datastreaming
+  labels:
+    app: schema-registry
+spec:
+  replicas: 2
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: schema-registry
+  template:
+    metadata:
+      labels:
+        app: schema-registry
+    spec:
+      containers:
+        - name: schema-registry-server
+          image: confluentinc/cp-schema-registry:7.1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SCHEMA_REGISTRY_HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+              value: kafka-service:9092
+            - name: SCHEMA_REGISTRY_LISTENERS
+              value: http://0.0.0.0:8081
+            - name: SCHEMA_REGISTRY_MASTER_ELIGIBILITY
+              value: "true"
+            - name: SCHEMA_REGISTRY_DEBUG
+              value: "true"
+            - name: SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL
+              value: full_transitive
+            - name: SCHEMA_REGISTRY_HEAP_OPTS
+              value: -Xms512M -Xmx512M
+          volumeMounts:
+          - mountPath: /etc/schema-registry/secrets
+            name: schema-registry-data
+      volumes:
+      - name: schema-registry-data
+        persistentVolumeClaim:
+          claimName: datastream-pvc
