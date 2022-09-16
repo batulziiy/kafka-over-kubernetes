@@ -28,6 +28,10 @@ spec:
         env:
         - name : ALLOW_ANONYMOUS_LOGIN
           value: "yes"
+        - name: ZOO_AUTOPURGE_INTERVAL
+          value: "1"
+        - name: ZOO_AUTOPURGE_RETAIN_COUNT
+          value: "3"
         volumeMounts:
         - mountPath: /bitnami/zookeeper
           name: zookeeper-data
