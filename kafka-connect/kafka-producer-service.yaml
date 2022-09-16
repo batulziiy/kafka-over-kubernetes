@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-producer-svc
+  namespace: datastreaming
+  labels:
+    app: kafka-producer-svc
+spec:
+  clusterIP: None
+  ports:
+    - name: kafka-producer-port
+      protocol: TCP
+      port: 8083
+  selector:
+    app: kafka-producer
