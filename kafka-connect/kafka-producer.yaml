@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-producer
+  namespace: datastreaming
+  labels:
+    app: kafka-producer
+spec:
+  replicas: 2
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: kafka-producer
+  template:
+    metadata:
+      labels:
+        app: kafka-producer
+    spec:
+      containers:
+        - name: debezium-container
+          image: glmtduh/debezium:1.7
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: kafka-service:9092
+            - name: ZOOKEEPER_SERVERS
+              value: zookeeper-service:2181
+            - name: GROUP_ID
+              value: cdc-pipeline
+            - name: OFFSET_STORAGE_TOPIC
+              value: cdc-offset
+            - name: CONFIG_STORAGE_TOPIC
+              value: cdc-configs
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: cdc-status
+            - name: KEY_CONVERTER
+              value: io.confluent.connect.avro.AvroConverter
+            - name: KEY_CONVERTER_SCHEMA_REGISTRY_URL
+              value: http://schema-registry-svc:8081
+            - name: VALUE_CONVERTER
+              value: io.confluent.connect.avro.AvroConverter
+            - name: VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+              value: http://schema-registry-svc:8081
+            - name: MAX_REQUEST_SIZE
+              value: "102404009"
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: kafka-producer-svc
+            - name: CONNECT_REST_PORT
+              value: "8083"
+            - name: INTERNAL_KEY_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: INTERNAL_VALUE_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: CONNECT_PLUGIN_PATH
+              value: "/usr/share/java/,/usr/share/confluent-hub-components/,/kafka/connect"
+            - name: CONNECT_LOG4J_LOGGERS
+              value: "DEBUG,appender,stdout"
+            - name: CONNECT_LOG4J_LOGGER_ORG_APACHE_KAFKA_CONNECT_RUNTIME_REST
+              value: "WARN"
+            - name: CONNECT_LOG_LEVEL
+              value: "DEBUG"
+            - name: LOG_ENABLED
+              value: "true"
+          ports:
+            - containerPort: 8083
+          volumeMounts:
+          - mountPath: /kafka/logs
+            name: debezium-data
+      volumes:
+      - name: debezium-data
+        persistentVolumeClaim:
+          claimName: datastream-pvc
