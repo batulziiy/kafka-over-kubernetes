@@ -1,0 +1,51 @@
+## Kafka commands ##
+# List topics
+kafka-topics.sh --list --bootstrap-server kafka-service:9092
+# Delete topic
+kafka-topics.sh --delete --topic <topic_name> --bootstrap-server kafka-service:9092
+# View messages 
+./kafka-console-consumer.sh --bootstrap-server kafka-service:9092 --property print.key=true \
+--formatter io.confluent.kafka.formatter.AvroMessageFormatter \
+--property schema.registry.url=http://schema-registry-svc:8081 \
+--from-beginning \
+--topic <topic_name>
+
+## kubectl commands ## 
+kubectl apply -f /path/to/deployment/yaml/file.yaml
+kubectl get pod
+kubectl get deployment
+kubectl get statefulset
+kubectl get service
+kubectl exec --stdin --tty --namespace <namespace> <pod_name> -- /bin/bash
+kubectl rollout restart deployment <deployment_name>
+kubectl delete <resource_name>
+kubectl get pvc 
+kubectl get pod -o wide
+kubectl describe <resource_name>
+
+## curl commands ##
+# View installed plugins 
+curl -s -X GET http://kafka-producer-svc-:8083/connector-plugins
+# Get connector status
+curl -i -X GET  http://kafka-producer-svc:8083/connectors/source-conncetor1/status
+# Get detailed status of the connectors
+curl -i -X GET  http://kafka-producer-svc:8083/connectors?expand=info&expand=status
+# Restart connector
+curl -i -X POST http://kafka-producer-svc:8083/connectors/source-connector1/restart
+# Delete connector
+curl -i -X DELETE http://kafka-producer-svc:8083/connectors/source-connector1
+# Pause connector
+curl -i -X POST http://kafka-producer-svc:8083/connectors/source-connector1/pause
+# Resume connector
+curl -i -X POST http://kafka-producer-svc:8083/connectors/source-connector1/resume
+# Modify connector
+curl -i -X PUT -H  "Content-Type:application/json" \
+http://kafka-producer-svc:8083/connectors/source-connector1/config \
+-d '{
+  # place your parameters here
+}'
+
+## Zookeeper commands ##
+# View active brokers
+zkCli.sh ls /brokers/ids
+
